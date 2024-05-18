@@ -8,7 +8,6 @@ using namespace std;
 #define FCFS
 
 #define MAX_PROCESS 10
-#define MAX_CHILDREN 3
 
 int current_time = 0;
 int total_process = 0;
@@ -53,7 +52,7 @@ PCB *create_process(int pid, int arrival_time, int service_time, int l) {
 // 删除进程及其所有的子进程
 void delete_process_tree(PCB *process) {
     if (process == NULL) return ;
-    for (int i = 0; i < MAX_CHILDREN; i++) {
+    for (int i = 0; i < MAX_PROCESS; i++) {
         delete_process_tree(process->children[i]);
     }
     free(process->children);
@@ -93,19 +92,16 @@ void create_children_process(PCB *parent, int max_level) {
     if (parent->level >= max_level || total_process >= MAX_PROCESS) {
         return ;
     }
-    parent->children = (PCB **)malloc(sizeof(PCB *) * MAX_CHILDREN);
     if (parent->children == NULL) {
-        cout << "Memory allocation failed!" << endl;
-        exit(EXIT_FAILURE);
+        return ;
     }
-    for (int i = total_process; i < MAX_CHILDREN; i++) {
+    parent->children = (PCB **)malloc(sizeof(PCB *) * MAX_PROCESS);
+    for (int i = total_process; i < MAX_PROCESS; i++) {
         int a = rand() % 5; // 随机到达时间
         int b = rand() % 10 + 1; // 随机服务时间
-        if (total_process < MAX_PROCESS) {
-            parent->children[i] = create_process(total_process, a + parent->arrival_time, b, parent->level + 1);
-            total_process++;
-            create_children_process(parent->children[i], max_level);
-        }
+        parent->children[i] = create_process(total_process, a + parent->arrival_time, b, parent->level + 1);
+        total_process++;
+        create_children_process(parent->children[i], max_level);
     }
     return ;
 }
